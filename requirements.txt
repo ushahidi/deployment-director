@@ -1,0 +1,6 @@
+PyYAML>3
+click>6
+voluptuous>0.10
+executor>=18
+frozendict>=1.2
+pytest>3

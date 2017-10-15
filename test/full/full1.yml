@@ -1,0 +1,76 @@
+version: "1"
+
+# Rules
+rules:
+- when:
+    repo: [ platform, platform-client ]
+  then:
+  - add_action:
+      name: deploy
+      action:
+        class_name: CommandAction
+        arguments:
+          command: >
+            ush-ansible-playbook.sh -vv -i {inventory} {playbook}
+              -e PLATFORM_CLIENT_DEPLOY_SRC="{build-location}"
+          env:
+            ANSIBLE_GITHUB_REPO: "{playbooks-repo}"
+            ANSIBLE_GITHUB_REPO_VERSION: master
+      enabled: false  
+
+  - when:   # everybody loves recursivity!
+      branch: [ production, develop ]
+    then:
+    - configure_action:
+        action:
+          name: deploy
+        settings:
+          enabled: true
+          labels: { flavour: 'io_deployment' }
+          parameters:
+            build-location: '${env[BUILD_LOCATION]}'
+            playbooks-repo: 'platform-ansible-cloud'
+            playbook:
+              key: repo
+              map:
+                platform: platform-api-update.yml
+                platform-client: platform-client-update.yml
+            inventory:
+              key: branch
+              map:
+                production: hosts/rackspace_prod.yml
+                develop: hosts/rackspace_stg.yml
+
+    - when:
+        branch: [ uchaguzi-2017 ]
+      then:
+      - configure_action:
+          action:
+            name: deploy
+          settings:
+            labels: { flavour: 'enterprise_deployment' }
+            parameters:
+              playbooks-repo: 'platform-enterprise-deployments'
+              limit:
+                value:
+                  groups: platform_uchaguzi_sandbox
+                  tags: code-deploy
+              playbook:
+                key: repo
+                map:
+                  platform: platform-api.yml
+                  platform-client: platform-client.yml
+
+# Pure Enterprise repositories
+- when:
+    repo: [ platform-msheria, platform-client-msheria ]
+    branch: master
+  then:
+  - add_action:
+      name: deploy
+      action:
+        class_name: CommandAction
+        arguments:
+          command: /bin/true
+      labels: { flavour: 'enterprise_deployment' }
+
