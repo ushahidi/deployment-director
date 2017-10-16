@@ -1,4 +1,4 @@
-from DeploymentDirector import ActionSettings, ParamValueAssignation
+from DeploymentDirector.rules import ActionSettings, ParamValueAssignation
 
 from voluptuous import Schema
 import yaml
