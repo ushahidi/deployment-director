@@ -100,7 +100,7 @@ class DeploymentDirector(object):
   def run_deployment(self):
     # If not dry run, execute actions
     if not self.options.get('dry_run'):
-      for (name,action) in self.actions:
+      for (name,action) in self.actions.items():
         print('\n\n')
         print('----++++ ACTION: %s ++++----' % name)
         print('\n\n')
