@@ -11,6 +11,3 @@ from DeploymentDirector import DeploymentDirector
 def main(rules_file, **options):
   rules = yaml.load(rules_file)
   dd = DeploymentDirector(rules, options=options)
-
-if __name__ == '__main__':
-    main()
