@@ -11,3 +11,5 @@ from DeploymentDirector import DeploymentDirector
 def main(rules_file, **options):
   rules = yaml.load(rules_file)
   dd = DeploymentDirector(rules, options=options)
+  dd.run_deployment()
+  

@@ -95,12 +95,14 @@ class DeploymentDirector(object):
     if (self.options.get('verbose') > 0):
       eprint('* resulting actions: ')
       for action in self.actions:
-        eprint('  - ' + repr(self.actions))
+        eprint('  - ' + repr(action))
 
   def run_deployment(self):
     # If not dry run, execute actions
     if not self.options.get('dry_run'):
       for (name,action) in self.actions:
-        print("Running action %s") % name
-        print(action)
+        print('\n\n')
+        print('----++++ ACTION: %s ++++----' % name)
+        print('\n\n')
+        action.execute()
 
