@@ -20,6 +20,7 @@ class CommandAction(BaseAction):
   def execute_action(self):
     if self.command is None:
       raise Exception("No command defined")
+    print("Executing command {}".format(self.parsed_command))
     return executor.execute(self.parsed_command, environment= self.parsed_env)
 
 __all__ = [ 'CommandAction' ]

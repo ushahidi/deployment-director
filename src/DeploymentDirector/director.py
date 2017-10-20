@@ -96,6 +96,7 @@ class DeploymentDirector(object):
       eprint('* resulting actions: ')
       for action in self.actions:
         eprint('  - ' + repr(action))
+        eprint('    = ' + repr(self.actions[action]))
 
   def run_deployment(self):
     # If not dry run, execute actions
