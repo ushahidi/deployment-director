@@ -45,6 +45,74 @@ class SchemaBinder(object):
     return "%s(%s)" % (self.__class__.__name__, repr(self.__dict__))
 
 
+# Class that represents a successful match
+class Match(object):
+  def __init__(self, matcher_clause, context, matched_as={}):
+    self.matcher_clause = matcher_clause
+    self.context = context
+    self.matched_as = matched_as
+
+  def map_lookup(self, mapp, key):
+    # 1. attempt retrieving the key from the context
+    map_key = self.context.getstr(key)
+    if mapp.has_key(map_key):
+      return mapp.get(map_key)
+    # 2. attempt key generated during matching (matched_as feature)
+    if self.matched_as.has_key(key):
+      return mapp.get(self.matched_as[key])
+    else:
+      return None
+
+
+class MatchSpec(SchemaBinder):
+  """
+  an operator provided string / object to do matching against, i.e.:
+    master
+  or:
+    /some-regex-.*/
+  or:
+    match: master
+  or:
+    match: /some-regex-.*/
+    as: regex-MATCH   # to be used later on in mapping
+  """
+  @classmethod
+  def schema(cls):
+    return Schema(Any(
+      All(str, CoerceToDict('match')),
+      {
+        Required('match'): str,
+        'as': str 
+      }
+      ))
+
+  @classmethod
+  def factory(cls, x):
+    return cls(**x)
+
+  def __init__(self, match, **kwargs):
+    self.match = match
+    self.as_alias = kwargs['as'] if kwargs.has_key('as') else None
+    # if the match spec is a regular expression, compile it
+    if re.match('/.*/', self.match):
+      self.match_re = re.compile(self.match[1:-1] + '$')  # added '$' forces whole string match
+
+  def test_match(self, value):
+    def is_a_match(value):
+      if hasattr(self, 'match_re'):
+        return self.match_re.match(value)
+      else:
+        return self.match == value
+    #
+    if is_a_match(value):
+      if self.as_alias:
+        return { 'as': self.as_alias }
+      else:
+        return True
+    else:
+      return False
+
+
 # available matchers against the deployment job context
 matching_criteria = Any('branch', 'repo')
 
@@ -57,7 +125,7 @@ class MatcherClause(SchemaBinder):
   """
   @classmethod
   def schema(cls):
-    return Schema({ matching_criteria: All( Any(str, [str]), CoerceArray) })
+    return Schema({ matching_criteria: All( Any(MatchSpec.binding(), [MatchSpec.binding()]), CoerceArray) })
 
   @classmethod
   def factory(cls, x):
@@ -69,16 +137,22 @@ class MatcherClause(SchemaBinder):
 
   def test(self, context):
     # all criterions must match (i.e. branch and repo), any failure to match aborts the loop
+    matched_as = {}
     for (k, match_specs) in self.criteria.items():
       value = context.getstr(k)
-      # any of the match_specs for the criterion can cause it to match (i.e. branch1 or branch2)
-      if not any(self.test_criterion(match_spec, value) for match_spec in match_specs):
+      match = self._any_match(match_specs, value)
+      if not match:   # shortcut: no match in a criterion is a failure
         return False
-    return True
+      if type(match) == dict:       # matched as something else
+        matched_as[k] = match['as']
+    return Match(matcher_clause=self, context=context, matched_as=matched_as)
 
-  def test_criterion(self, match_spec, value):
-    # we do simple matching by now (maybe regex matching in the future?)
-    return match_spec == value
+  def _any_match(self, match_specs, value):
+    for match_spec in match_specs:
+      match = match_spec.test_match(value)
+      if match:       # stops at the first match
+        return match  # may be True or { 'as': ... }
+    return False
 
   def __repr__(self):
     return "MatcherClause(%s)" % repr(self.criteria)
@@ -171,12 +245,12 @@ class ParamValueAssignation(SchemaBinder):
     else:
       return obj
 
-  def resolve(self, context):
+  def resolve(self, match):
+    context = match.context
     if hasattr(self, 'value'):
       return self.interpolate(self.value, context)
     elif hasattr(self, 'map'):
-      map_key = context.getstr(self.key)
-      value = self.map.get(map_key)
+      value = match.map_lookup(self.map, self.key)
       return self.interpolate(value, context)
     else:
       return None
@@ -203,9 +277,9 @@ class ActionSettings(SchemaBinder):
   def __init__(self, **kwargs):
     self.__dict__.update(kwargs)
 
-  def resolve(self, context):
+  def resolve(self, match):
     def param_resolve(obj):
-      return obj.resolve(context) if isinstance(obj, ParamValueAssignation) else obj
+      return obj.resolve(match) if isinstance(obj, ParamValueAssignation) else obj
 
     settings = dict(
       reduce(
@@ -249,12 +323,12 @@ class AddAction(SchemaBinder):
     if len(kwargs) > 0:
       self.__dict__.update({ 'settings': ActionSettings(**kwargs) })
 
-  def apply(self, context, actions):
+  def apply(self, match, actions):
     if actions.has_key(self.name):
       raise Exception("An action named %s already exists")
     new_action = create_action(self.action)
     if hasattr(self, 'settings'):
-      new_action.update_settings(self.settings.resolve(context))
+      new_action.update_settings(self.settings.resolve(match))
     actions[self.name] = new_action
 
 
@@ -298,10 +372,10 @@ class ConfigureAction(SchemaBinder):
   def __init__(self, action, settings):
     self.__dict__.update(action=action, settings=settings)
 
-  def apply(self, context, actions):
+  def apply(self, match, actions):
     action = self.action.match(actions)
     if action:
-      action.update_settings(self.settings.resolve(context))
+      action.update_settings(self.settings.resolve(match))
 
 
 class Rule(SchemaBinder):
@@ -347,12 +421,14 @@ class Rule(SchemaBinder):
     self.__dict__.update(when=when, then=then)
 
   def eval(self, context, actions):
-    if any(clause.test(context) for clause in self.when):
-      for consequence in self.then:
-        consequence.apply(context, actions)
+    for clause in self.when:
+      match = clause.test(context)
+      if match:   # one match is enough (by now)
+        for consequence in self.then:
+          consequence.apply(match, actions)
 
-  def apply(self, context, actions):
-    self.eval(context, actions)
+  def apply(self, match, actions):
+    self.eval(match.context, actions)
 
 class RulesFile(SchemaBinder):
   @classmethod

@@ -43,23 +43,23 @@ then:
         command: true
 """
 
-def test_actions(context):
+def test_actions(match):
   actions = {}
   conseq1 = add_action(a1)
-  conseq1.apply(context, actions)
+  conseq1.apply(match, actions)
   assert(len(actions) > 0)
   assert(actions.has_key('a1'))
   assert(isinstance(actions['a1'], CommandAction))
   assert(actions['a1'].enabled)
-  assert(actions['a1'].params.get('param1') == context.repo)
-  assert(actions['a1'].params.get('param2') == context.repo)
+  assert(actions['a1'].params.get('param1') == match.context.repo)
+  assert(actions['a1'].params.get('param2') == match.context.repo)
 
   conseq2 = configure_action(c1)
-  conseq2.apply(context, actions)
+  conseq2.apply(match, actions)
   assert(len(actions) > 0)
   assert(actions.has_key('a1'))
   assert(isinstance(actions['a1'], CommandAction))
   assert(not actions['a1'].enabled)
-  assert(actions['a1'].params.get('param1') == context.repo)
-  assert(actions['a1'].params.get('param2') == context.branch)
+  assert(actions['a1'].params.get('param1') == match.context.repo)
+  assert(actions['a1'].params.get('param2') == match.context.branch)
 

@@ -41,25 +41,30 @@ rules:
                 production: hosts/rackspace_prod.yml
                 develop: hosts/rackspace_stg.yml
 
-    - when:
-        branch: [ uchaguzi-2017 ]
-      then:
-      - configure_action:
-          action:
-            name: deploy
-          settings:
-            labels: { flavour: 'enterprise_deployment' }
-            parameters:
-              playbooks-repo: 'platform-enterprise-deployments'
-              limit:
-                value:
-                  groups: platform_uchaguzi_sandbox
-                  tags: code-deploy
-              playbook:
-                key: repo
-                map:
-                  platform: platform-api.yml
-                  platform-client: platform-client.yml
+  - when:
+      branch:
+      - uchaguzi-2017
+      - match: /uchaguzi-release-.*/
+        as: uchaguzi-RELEASE 
+    then:
+    - configure_action:
+        action:
+          name: deploy
+        settings:
+          enabled: true
+          labels: { flavour: 'enterprise_deployment' }
+          parameters:
+            inventory:
+              key: branch
+              map:
+                uchaguzi-2017: platform_uchaguzi_sandbox
+                uchaguzi-RELEASE: platform_uchaguzi
+            playbooks-repo: 'platform-enterprise-deployments'
+            playbook:
+              key: repo
+              map:
+                platform: platform-api.yml
+                platform-client: platform-client.yml
 
 # Pure Enterprise repositories
 - when:

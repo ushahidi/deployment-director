@@ -27,3 +27,15 @@ def test_full1(full1):
   assert(re.sub("\s+", " ", dd.actions['deploy'].parsed_command).strip() ==
     "ush-ansible-playbook.sh -vv -i hosts/rackspace_prod.yml platform-api-update.yml -e PLATFORM_CLIENT_DEPLOY_SRC=\"/var/tmp\"")
   assert(dd.actions['deploy'].parsed_env['ANSIBLE_GITHUB_REPO'] == 'platform-ansible-cloud')
+
+  dd = DeploymentDirector(full1, { 'ci_name': 'codeship' }, { 'CI_BRANCH': 'uchaguzi-2017', 'CI_REPO_NAME': 'platform' })
+  assert(len(dd.actions) == 1)
+  assert(dd.actions.has_key('deploy'))
+  assert(dd.actions['deploy'].enabled)
+  assert(dd.actions['deploy'].params['inventory'] == 'platform_uchaguzi_sandbox')
+
+  dd = DeploymentDirector(full1, { 'ci_name': 'codeship' }, { 'CI_BRANCH': 'uchaguzi-release-20170101', 'CI_REPO_NAME': 'platform' })
+  assert(len(dd.actions) == 1)
+  assert(dd.actions.has_key('deploy'))
+  assert(dd.actions['deploy'].enabled)
+  assert(dd.actions['deploy'].params['inventory'] == 'platform_uchaguzi')

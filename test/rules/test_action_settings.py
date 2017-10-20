@@ -1,4 +1,4 @@
-from DeploymentDirector.rules import ActionSettings, ParamValueAssignation
+from DeploymentDirector.rules import ActionSettings, ParamValueAssignation, Match
 
 from voluptuous import Schema
 import yaml
@@ -26,7 +26,7 @@ settings_2 = yaml.load(settings_2)
 
 
 @pytest.mark.parametrize('settings', [ settings_1, settings_2 ])
-def test_action_settings(settings, context):
+def test_action_settings(settings, match):
   def unwind(obj):
     if type(obj) in (list,tuple,set):
       for v in obj: unwind(v)
@@ -38,7 +38,7 @@ def test_action_settings(settings, context):
   assert(isinstance(x, ActionSettings))
   assert(all([isinstance(p,ParamValueAssignation) for p in x.parameters.values()]))
   print x.parameters
-  x = x.resolve(context)
+  x = x.resolve(match)
   print x.parameters
   assert(isinstance(x, ActionSettings))
   assert(all([type(p) in (str,bool,int) for (k,p) in unwind(x.parameters.items())]))

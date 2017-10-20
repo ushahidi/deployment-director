@@ -1,6 +1,8 @@
 import pytest
 
 from DeploymentDirector.director import Context
+from DeploymentDirector.rules import Match
+
 
 # def pytest_generate_tests(metafunc):
 #   if 'context' in metafunc.fixturenames:
@@ -28,3 +30,11 @@ envs={
 @pytest.fixture(params=envs.keys(), ids=envs.keys())
 def context(request):
   return Context(options={'ci_name': 'codeship'}, env=envs[request.param] )
+
+@pytest.fixture
+def match(context):
+  return Match(matcher_clause=None, context=context)
+
+@pytest.fixture
+def match_branch_as_DEFAULT(context):
+  return Match(matcher_clause=None, context=context, matched_as={ 'branch': 'DEFAULT' })
