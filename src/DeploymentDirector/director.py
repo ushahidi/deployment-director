@@ -5,7 +5,7 @@ from collections import OrderedDict
 from frozendict import frozendict
 
 from .rules import *
-from .utils import eprint
+from .utils import eprint, envdict
 
 # The deployment director compiles a context, consisting of:
 # ci:
@@ -19,7 +19,7 @@ class Context(object):
   __slots__ = [ '_ci', '_env' ]
 
   def __init__(self, options, env={}):
-    self._env = frozendict(os.environ) if len(env) == 0 else frozendict(env)
+    self._env = envdict(os.environ) if len(env) == 0 else envdict(env)
     if options.get('ci_name') == 'codeship':
       self._load_civars_codeship()
     else:
@@ -83,14 +83,14 @@ class DeploymentDirector(object):
   def parse_rules(self, rules):
     # Verify schema
     rules = RulesFile.parse(rules)
-    
+
     # Go through each of the rules
     for rule in rules.rules:
       if (self.options.get('verbose') > 0):
         eprint('* evaluating rule: ')
         eprint('  ' + repr(rule))
       rule.eval(context=self.context, actions=self.actions)
-    
+
     # Print the actions
     if (self.options.get('verbose') > 0):
       eprint('* resulting actions: ')
@@ -106,4 +106,3 @@ class DeploymentDirector(object):
         print('----++++ ACTION: %s ++++----' % name)
         print('\n\n')
         action.execute()
-
