@@ -33,7 +33,7 @@ c1 = yaml.load(c1)
 
 r1 = """
 when:
-  
+
 then:
   add_action:
     name: a2
@@ -63,3 +63,12 @@ def test_actions(match):
   assert(actions['a1'].params.get('param1') == match.context.repo)
   assert(actions['a1'].params.get('param2') == match.context.branch)
 
+def test_duplicate_actions(match):
+  actions = {}
+  conseq1 = add_action(a1)
+  conseq1.apply(match, actions)
+
+  with pytest.raises(Exception) as excinfo:
+    conseq2 = add_action(a1)
+    conseq2.apply(match, actions)
+  assert 'An action named a1 already exists' in str(excinfo.value)
