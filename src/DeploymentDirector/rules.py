@@ -38,7 +38,7 @@ class SchemaBinder(object):
 
   @classmethod
   def binding(cls):
-    # Returns a schema bound to an object of the invoked class, 
+    # Returns a schema bound to an object of the invoked class,
     return Schema(All(cls.schema(), lambda x: cls.factory(x)))
 
   def __repr__(self):
@@ -82,7 +82,7 @@ class MatchSpec(SchemaBinder):
       All(str, CoerceToDict('match')),
       {
         Required('match'): str,
-        'as': str 
+        'as': str
       }
       ))
 
@@ -325,7 +325,7 @@ class AddAction(SchemaBinder):
 
   def apply(self, match, actions):
     if actions.has_key(self.name):
-      raise Exception("An action named %s already exists")
+      raise Exception("An action named %s already exists" % self.name)
     new_action = create_action(self.action)
     if hasattr(self, 'settings'):
       new_action.update_settings(self.settings.resolve(match))
