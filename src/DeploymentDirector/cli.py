@@ -1,6 +1,8 @@
 import click
 import yaml
 
+from .utils import eprint
+
 from DeploymentDirector import DeploymentDirector
 
 @click.command()
@@ -11,5 +13,10 @@ from DeploymentDirector import DeploymentDirector
 def main(rules_file, **options):
   rules = yaml.load(rules_file)
   dd = DeploymentDirector(rules, options=options)
-  dd.run_deployment()
-  
+  actions_ok = dd.run_deployment()
+  if actions_ok:
+    eprint('\n===== ALL ACTIONS OK =====')
+    return 0
+  else:
+    eprint('\n===== SOME ACTIONS FAILED =====')
+    return 1

@@ -1,4 +1,5 @@
 from .base import BaseAction
+from ..utils import eprint
 
 from copy import copy
 import executor
@@ -19,8 +20,9 @@ class CommandAction(BaseAction):
 
   def execute_action(self):
     if self.command is None:
-      raise Exception("No command defined")
-    print("Executing command {}".format(self.parsed_command))
-    return executor.execute(self.parsed_command, environment= self.parsed_env)
+      eprint("ERROR: No command defined for action")
+      return False
+    eprint("Executing command {}".format(self.parsed_command))
+    return executor.execute(self.parsed_command, environment=self.parsed_env, check=False)
 
 __all__ = [ 'CommandAction' ]

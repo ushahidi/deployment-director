@@ -99,10 +99,18 @@ class DeploymentDirector(object):
         eprint('    = ' + repr(self.actions[action]))
 
   def run_deployment(self):
+    all_actions_ok = True
     # If not dry run, execute actions
     if not self.options.get('dry_run'):
       for (name,action) in self.actions.items():
-        print('\n\n')
-        print('----++++ ACTION: %s ++++----' % name)
-        print('\n\n')
-        action.execute()
+        eprint('\n\n')
+        eprint('----++++ ACTION: %s ++++----' % name)
+        eprint('\n\n')
+        success = action.execute()
+        if success:
+          eprint("\n++++---- action OK ----++++\n")
+        else:
+          eprint("\n++++---- action FAILED ----++++\n")
+          all_actions_ok = False
+
+    return all_actions_ok
