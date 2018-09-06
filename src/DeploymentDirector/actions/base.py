@@ -8,6 +8,7 @@ class BaseAction(object):
     self.params = {}
     self.labels = {}
     self.executed = False
+    self.succeeded = None
 
   def update_settings(self, settings):
     if hasattr(settings, 'enabled'):
@@ -27,6 +28,7 @@ class BaseAction(object):
     if self.enabled:
       ret = self.execute_action()
       self.executed = True
+      self.succeeded = ret
       return ret
 
   @abstractmethod

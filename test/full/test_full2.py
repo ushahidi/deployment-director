@@ -18,12 +18,16 @@ def test_full2(full2):
   assert(dd.actions['ActionSucceed'].enabled)
   assert(dd.run_deployment())
   assert(dd.actions['ActionSucceed'].executed)
+  assert(dd.actions['ActionSucceed'].succeeded)
 
   dd = DeploymentDirector(full2, { 'ci_name': 'codeship' }, { 'CI_BRANCH': 'branch2', 'CI_REPO_NAME': 'repoA' })
   assert(len(dd.actions) == 3)
   for action_name in ['ActionSucceed', 'ActionFail', 'ActionSucceedToo']:
-      assert(dd.actions.has_key(action_name))
-      assert(dd.actions[action_name].enabled)
+    assert(dd.actions.has_key(action_name))
+    assert(dd.actions[action_name].enabled)
   assert(dd.run_deployment() == False)
   for action_name in ['ActionSucceed', 'ActionFail', 'ActionSucceedToo']:
-      assert(dd.actions[action_name].executed)
+    assert(dd.actions[action_name].executed)
+  assert(dd.actions['ActionSucceed'].succeeded)
+  assert(not dd.actions['ActionFail'].succeeded)
+  assert(dd.actions['ActionSucceedToo'].succeeded)

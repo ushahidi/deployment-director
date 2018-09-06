@@ -14,9 +14,19 @@ def main(rules_file, **options):
   rules = yaml.load(rules_file)
   dd = DeploymentDirector(rules, options=options)
   actions_ok = dd.run_deployment()
+  if len(dd.actions) > 0:
+    click.echo('\n')
+    click.secho('===== ACTION RESULT SUMMARY ======', fg='cyan', bold=True)
+    for (name,action) in dd.actions.iteritems():
+      color = None
+      text = 'not run'
+      if action.succeeded is not None:
+        color = 'green' if action.succeeded else 'red'
+        text = 'SUCCESS' if action.succeeded else 'FAIL'
+      click.secho('  - %s: %s' % (name, text), fg=color)
   if actions_ok:
-    eprint('\n===== ALL ACTIONS OK =====')
+    click.secho('\n===== SUCCESS =====', fg='green', bold=True)
     return 0
   else:
-    eprint('\n===== SOME ACTIONS FAILED =====')
-    return 1
+    click.secho('\n+++++ SOME ERRORS ENCOUNTERED +++++', fg='red', bold=True)
+    raise SystemExit(1)
