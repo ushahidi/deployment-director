@@ -31,3 +31,8 @@ def test_full2(full2):
   assert(dd.actions['ActionSucceed'].succeeded)
   assert(not dd.actions['ActionFail'].succeeded)
   assert(dd.actions['ActionSucceedToo'].succeeded)
+
+  dd = DeploymentDirector(full2, { 'ci_name': 'codeship' }, { 'CI_BRANCH': 'branch3', 'CI_REPO_NAME': 'repoA' })
+  assert(len(dd.actions) == 2)
+  assert(dd.run_deployment())
+

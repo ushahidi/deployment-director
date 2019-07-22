@@ -107,10 +107,15 @@ class DeploymentDirector(object):
         eprint('----++++ ACTION: %s ++++----' % name)
         eprint('\n\n')
         success = action.execute()
-        if success:
+        if success == True:
           eprint("\n++++---- action OK ----++++\n")
-        else:
+        elif success == False:
           eprint("\n++++---- action FAILED ----++++\n")
+          all_actions_ok = False
+        elif success is None:
+          eprint("\n++++---- action SKIPPED ----++++\n")
+        else:
+          eprint("\n++++---- action RESULT UNKNOWN ----++++\n")
           all_actions_ok = False
 
     return all_actions_ok

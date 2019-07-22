@@ -4,7 +4,7 @@ version: "1"
 rules:
 - when:
     repo: repoA
-    branch: [ branch1, branch2 ]
+    branch: [ branch1, branch2, branch3 ]
   then:
   - add_action:
       name: ActionSucceed
@@ -13,6 +13,16 @@ rules:
         arguments:
           command: "true"
       enabled: True
+  - when:
+      branch: branch3
+    then:
+    - add_action:
+        name: DisabledDeploy
+        enabled: false
+        action:
+          class_name: CommandAction
+          arguments:
+            command: "true"
 
 # branch2 has an additional two commands, one of which fails
 # still, all commands should execute
