@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 
+from __future__ import absolute_import
 from .utils import interpolate, create_action
 
 from voluptuous import Schema, All, Any, Coerce, Required
 import re
+from functools import reduce
 
 # useful coercers to normalise the schema output and open some shortcuts
 # for the user when writing the yaml
@@ -55,10 +57,10 @@ class Match(object):
   def map_lookup(self, mapp, key):
     # 1. attempt retrieving the key from the context
     map_key = self.context.getstr(key)
-    if mapp.has_key(map_key):
+    if map_key in mapp:
       return mapp.get(map_key)
     # 2. attempt key generated during matching (matched_as feature)
-    if self.matched_as.has_key(key):
+    if key in self.matched_as:
       return mapp.get(self.matched_as[key])
     else:
       return None
@@ -92,7 +94,7 @@ class MatchSpec(SchemaBinder):
 
   def __init__(self, match, **kwargs):
     self.match = match
-    self.as_alias = kwargs['as'] if kwargs.has_key('as') else None
+    self.as_alias = kwargs['as'] if 'as' in kwargs else None
     # if the match spec is a regular expression, compile it
     if re.match('/.*/', self.match):
       self.match_re = re.compile(self.match[1:-1] + '$')  # added '$' forces whole string match
@@ -324,7 +326,7 @@ class AddAction(SchemaBinder):
       self.__dict__.update({ 'settings': ActionSettings(**kwargs) })
 
   def apply(self, match, actions):
-    if actions.has_key(self.name):
+    if self.name in actions:
       raise Exception("An action named %s already exists" % self.name)
     new_action = create_action(self.action)
     if hasattr(self, 'settings'):

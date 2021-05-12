@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import pytest
 
 from DeploymentDirector.director import Context
@@ -27,7 +28,7 @@ envs={
     }
   }
 
-@pytest.fixture(params=envs.keys(), ids=envs.keys())
+@pytest.fixture(params=list(envs.keys()), ids=list(envs.keys()))
 def context(request):
   return Context(options={'ci_name': 'codeship'}, env=envs[request.param] )
 

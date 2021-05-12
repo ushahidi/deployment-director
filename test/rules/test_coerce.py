@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from DeploymentDirector.rules import CoerceArray, CoerceToDict
 
 def test_coerce_array():

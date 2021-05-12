@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from DeploymentDirector.rules import AddAction, ConfigureAction, Rule
 from DeploymentDirector.actions import CommandAction
 
@@ -19,7 +20,7 @@ add_action:
     param1: ${repo}
     param2: ${repo}
 """
-a1 = yaml.load(a1)
+a1 = yaml.safe_load(a1)
 
 c1 = """
 configure_action:
@@ -29,7 +30,7 @@ configure_action:
     parameters:
       param2: ${branch}
 """
-c1 = yaml.load(c1)
+c1 = yaml.safe_load(c1)
 
 r1 = """
 when:
@@ -48,7 +49,7 @@ def test_actions(match):
   conseq1 = add_action(a1)
   conseq1.apply(match, actions)
   assert(len(actions) > 0)
-  assert(actions.has_key('a1'))
+  assert('a1' in actions)
   assert(isinstance(actions['a1'], CommandAction))
   assert(actions['a1'].enabled)
   assert(actions['a1'].params.get('param1') == match.context.repo)
@@ -57,7 +58,7 @@ def test_actions(match):
   conseq2 = configure_action(c1)
   conseq2.apply(match, actions)
   assert(len(actions) > 0)
-  assert(actions.has_key('a1'))
+  assert('a1' in actions)
   assert(isinstance(actions['a1'], CommandAction))
   assert(not actions['a1'].enabled)
   assert(actions['a1'].params.get('param1') == match.context.repo)

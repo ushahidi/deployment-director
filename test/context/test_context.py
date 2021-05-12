@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import pytest
 
 def test_context(context):

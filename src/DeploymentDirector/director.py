@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from __future__ import absolute_import
 import os
 from collections import OrderedDict
 from frozendict import frozendict
@@ -67,6 +68,12 @@ class Context(object):
 
 
 class DeploymentDirector(object):
+
+  def _elog(self, v_level, *args):
+    if self.options.get('verbose', 0) >= v_level:
+      for arg in args:
+        eprint(arg)
+
   """
   """
   def __init__(self, rules, options={}, env={}, env_overwrite={}):
@@ -75,8 +82,7 @@ class DeploymentDirector(object):
     self.actions = OrderedDict()
     self.context = Context(options, env)
     #
-    if (self.options.get('verbose') > 0):
-      eprint('* Using context: %s' % repr(self.context))
+    self._elog(1, '* Using context: %s' % repr(self.context))
     #
     self.parse_rules(rules)
 
@@ -86,17 +92,17 @@ class DeploymentDirector(object):
 
     # Go through each of the rules
     for rule in rules.rules:
-      if (self.options.get('verbose') > 0):
-        eprint('* evaluating rule: ')
-        eprint('  ' + repr(rule))
+      self._elog(1,
+        '* evaluating rule: ',
+        '  ' + repr(rule))
       rule.eval(context=self.context, actions=self.actions)
 
     # Print the actions
-    if (self.options.get('verbose') > 0):
-      eprint('* resulting actions: ')
-      for action in self.actions:
-        eprint('  - ' + repr(action))
-        eprint('    = ' + repr(self.actions[action]))
+    self._elog(1, '* resulting actions: ')
+    for action in self.actions:
+      self._elog(1,
+        '  - ' + repr(action),
+        '    = ' + repr(self.actions[action]))
 
   def run_deployment(self):
     all_actions_ok = True

@@ -1,4 +1,5 @@
 from __future__ import print_function
+from __future__ import absolute_import
 import importlib, re
 from frozendict import frozendict
 
@@ -21,7 +22,5 @@ def eprint(*args, **kwargs):
   print(*args, file=sys.stderr, **kwargs)
 
 class envdict(frozendict):
-  class lenient_dict(dict):
-    def __missing__(self, key):
-      return ""
-  dict_cls = lenient_dict
+  def __missing__(self, key):
+    return ""

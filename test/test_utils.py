@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from DeploymentDirector.utils import interpolate, create_action
 from DeploymentDirector.rules import ActionDef
 from DeploymentDirector.actions.base import BaseAction

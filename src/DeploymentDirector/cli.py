@@ -1,23 +1,25 @@
+from __future__ import absolute_import
 import click
 import yaml
 
 from .utils import eprint
 
 from DeploymentDirector import DeploymentDirector
+import six
 
 @click.command()
 @click.option('--ci-name', help='Name of the CI product deployment director is running under', envvar='CI_NAME')
 @click.option('--dry-run', '-n', help='Do not actually execute any actions, just print them out')
-@click.option('--verbose', '-v', count=True)
+@click.option('--verbose', '-v', default=0, count=True)
 @click.argument('rules_file', type=click.File('r'))
 def main(rules_file, **options):
-  rules = yaml.load(rules_file)
+  rules = yaml.safe_load(rules_file)
   dd = DeploymentDirector(rules, options=options)
   actions_ok = dd.run_deployment()
   if len(dd.actions) > 0:
     click.echo('\n')
     click.secho('===== ACTION RESULT SUMMARY ======', fg='cyan', bold=True)
-    for (name,action) in dd.actions.iteritems():
+    for (name,action) in six.iteritems(dd.actions):
       color = None
       text = 'not run'
       if action.succeeded is not None:

@@ -1,5 +1,7 @@
+from __future__ import absolute_import
 from .base import BaseAction
 from ..utils import eprint
+from collections import defaultdict
 
 from copy import copy
 import executor
@@ -16,7 +18,10 @@ class CommandAction(BaseAction):
 
   @property
   def parsed_env(self):
-  	return dict([(k,v.format(**self.params)) for (k,v) in self.env.items()])
+  	return defaultdict(
+      lambda: '',
+      [(k,v.format(**self.params)) for (k,v) in self.env.items()]
+    )
 
   def execute_action(self):
     if self.command is None:

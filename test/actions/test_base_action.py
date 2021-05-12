@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from DeploymentDirector.actions.base import BaseAction
 from DeploymentDirector.rules import ActionSettings
 
@@ -17,8 +18,8 @@ def test_base_action():
   assert(a.execute() is None)
 
   a.update_settings(ActionSettings(parameters={ 'param1': 'value1' }))
-  assert(a.params.has_key('param1'))
+  assert('param1' in a.params)
 
   a.update_settings(ActionSettings(parameters={ 'param2': 'value2' }))
-  assert(a.params.has_key('param1') and a.params.has_key('param2'))
+  assert('param1' in a.params and 'param2' in a.params)
 

@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from DeploymentDirector.rules import MatchSpec
 
 import voluptuous
@@ -8,10 +9,10 @@ match_spec = MatchSpec.binding()
 _match_spec_schema_ok = [
   'master',
   'development',
-  '/release-\d+/',
+  r'/release-\d+/',
   { 'match': 'master' },
   { 'match': 'master', 'as': 'MASTER' },
-  { 'match': '/release-\d+', 'as': 'RELEASE' }
+  { 'match': r'/release-\d+', 'as': 'RELEASE' }
 ]
 
 _match_spec_schema_fail = [
@@ -37,13 +38,13 @@ def test_match_spec_schema_fail(x):
 
 
 _match_spec_re_ok = [
-  ('/release-.*/', 'release-20170808'),
-  ('/v(\d\.?)+/', 'v0.0.1'),
+  (r'/release-.*/', 'release-20170808'),
+  (r'/v(\d\.?)+/', 'v0.0.1'),
 ]
 
 _match_spec_re_fail = [
-  ('/release-.*/', 'RELEASE-20170808'),   # case sensitive
-  ('/v(\d\.?)+/', 'v0.0.1a'),             # whole string match
+  (r'/release-.*/', 'RELEASE-20170808'),   # case sensitive
+  (r'/v(\d\.?)+/', 'v0.0.1a'),             # whole string match
 ]
 
 @pytest.mark.parametrize('x,value', _match_spec_re_ok)
@@ -62,9 +63,9 @@ def test_match_re_fail(x, value):
 
 
 _match_spec_as = [
-  ({ 'match': '/release-.*/', 'as': 'RELEASE_match' }, 'release-20170808', { 'as': 'RELEASE_match' }),
-  ({ 'match': '/v(\d\.?)+/', 'as': 'VERSION_match' }, 'v0.0.1', { 'as': 'VERSION_match' }),
-  ({ 'match': '/v(\d\.?)+/', 'as': 'VERSION_match' }, 'v0.0.1a', False),    # re mismatch, thus False
+  ({ 'match': r'/release-.*/', 'as': 'RELEASE_match' }, 'release-20170808', { 'as': 'RELEASE_match' }),
+  ({ 'match': r'/v(\d\.?)+/', 'as': 'VERSION_match' }, 'v0.0.1', { 'as': 'VERSION_match' }),
+  ({ 'match': r'/v(\d\.?)+/', 'as': 'VERSION_match' }, 'v0.0.1a', False),    # re mismatch, thus False
 ]
 @pytest.mark.parametrize('x,value,result', _match_spec_as)
 def test_match_as(x, value, result):

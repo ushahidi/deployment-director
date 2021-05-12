@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from DeploymentDirector.rules import ParamValueAssignation
 
 import pytest
