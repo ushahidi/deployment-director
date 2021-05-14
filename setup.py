@@ -2,19 +2,6 @@
 
 from setuptools import setup
 
-setup(name='deployment-director',
-      version='0.1.10',
-      description='Deployment Director',
-      url='https://github.com/ushahidi/deployment-director',
-      author='Ushahidi Team',
-      author_email='team@ushahidi.com',
-      license='MIT',
-      packages=['DeploymentDirector', 'DeploymentDirector.actions'],
-      package_dir = {'': 'src'},
-      entry_points={'console_scripts':
-                        ['deployment-director=DeploymentDirector.cli:main']},
-      install_requires=['PyYAML>3', 'click>6', 'voluptuous>0.10', 'executor>=18', 'frozendict>=1.2'],
-      setup_requires=['pytest-runner'],
-      tests_require=['pytest>3,<5'],
-      download_url='https://github.com/ushahidi/deployment-director/archive/0.1.7.tar.gz',
-      keywords=['deploy', 'automation', ])
+if __name__ == "__main__":
+    setup()
+
